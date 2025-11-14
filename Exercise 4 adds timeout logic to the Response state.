@@ -1,0 +1,59 @@
+Exercise 4 — Timeout and Choice
+
+Goal
+
+Exercise 4 adds timeout logic to the Response state.
+
+
+Previously (Exercise 3), the system waited indefinitely for a button press. Now, if the subject does not respond within a fixed time window, the trial automatically ends as a miss.
+This introduces competition between two events:
+  Subject responds → trial ends successfully.
+  Timeout occurs → trial ends as a failure/miss.
+
+Step-by-Step Workflow Logic
+
+1. Timer Inside Response. Insert a Timer node with DueTime = 1 second. This represents the maximum allowed response time. When the timer fires, it outputs an event indicating the response window has expired.
+
+2. Boolean for Timeout. Insert a Boolean operator and set its Value = False. This signifies that if the timer fires before a button press, the outcome is considered a miss.
+
+3. Merge Events. Merge the two event streams inside SelectMany (Response):
+  Button press → True
+  Timeout → False
+
+Connect the output of the merge to the Take(1) operator. This ensures that whichever event occurs first ends the response period.
+
+4. WorkflowOutput
+The first event to occur (press or timeout) is sent to WorkflowOutput:
+    True → button was pressed → trial potentially successful
+    False → no response within timeout → trial missed
+
+What this workflow does, in plain words
+Stimulus turns on (StimOn). The system waits for the first button press OR a 1-second timeout, whichever happens first. Merge combinator handles both streams:
+  Button press → True
+  Timeout → False
+  Take(1) ensures only the first event counts.
+  WorkflowOutput emits the result, which will be used in the next exercise to decide success or fail.
+
+ASCII Flow Diagram
+StimOn (LED ON)
+       │
+       ▼
+  Response State (SelectMany)
+       │
+       ├── Button Press → Boolean(True)
+       │
+       └── Timer(1s) → Boolean(False)
+       │
+       ▼
+   Merge → Take(1) → WorkflowOutput
+
+Key Notes
+This implements a response window: the subject must respond within a fixed time. The workflow now handles both choices: respond in time or fail.
+The merge ensures first event wins, which is critical for accurate task logic. This sets up the structure for conditional outcomes in Exercise 5 (Reward vs Fail).
+
+Summary
+Exercise 4 enhances the Response state by:
+  Adding a 1-second timeout for the response period.
+  Creating a race between button press and timeout.
+  Emitting a boolean output (True for hit, False for miss) for downstream processing.
+  This makes the trial truly behaviour-driven with defined response windows.
