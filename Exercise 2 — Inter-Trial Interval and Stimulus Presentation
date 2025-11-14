@@ -1,0 +1,55 @@
+Exercise 2 — Inter-Trial Interval and Stimulus Presentation
+
+🎯 Goal
+This exercise implements the first part of the state machine: Inter-Trial Interval (ITI) — a waiting period before the trial starts. Stimulus Presentation — turning a stimulus LED on and then off for a fixed duration.
+It sets up the timing and control logic for each trial.
+
+🧩 Step-by-Step Workflow Logic
+1. Timer → StimOn A Timer node is inserted with a DueTime of ~3 seconds. This represents the ITI, i.e., the system waits 3 seconds before starting the trial. When the timer fires, it triggers a Sink node named StimOn.
+
+2. Sink → LED ON
+Inside StimOn: A Boolean operator is set to True. It is connected to the Led subject (using Multicast).
+This turns the LED on, representing stimulus onset.
+
+3. Delay → StimOff
+After stimulus onset, a Delay node is inserted (e.g., 2 seconds).
+This defines how long the stimulus remains ON.
+After the delay, a second Sink node (StimOff) is triggered.
+
+4. Sink → LED OFF
+Inside StimOff: A Boolean operator is set to False.
+Connected to the same Led subject. This turns the LED off, ending the stimulus.
+5. Repeat
+
+A Repeat node is added after StimOff. This sends the workflow back to the beginning (the ITI timer), allowing multiple trials to run sequentially.
+
+🔍 What this workflow does, in plain words
+
+Waits for the ITI timer (~3 s) → starts trial
+Turns LED ON (StimOn) → stimulus is presented
+Waits for a short period (Delay) → stimulus duration
+Turns LED OFF (StimOff) → stimulus ends
+Repeats the sequence for the next trial
+
+📝 ASCII Flow Diagram
+ITI Timer (3s)
+       │
+       ▼
+   [StimOn]  (LED = ON)
+       │
+       ▼
+     Delay   (stimulus duration)
+       │
+       ▼
+   [StimOff] (LED = OFF)
+       │
+       ▼
+     Repeat → back to ITI Timer
+
+⚡ Key Notes
+The Sink operator allows you to perform side-effects (like turning on an LED) without changing the main event stream. The Multicast connection ensures the Led subject can be used elsewhere in the workflow. The Repeat operator automates multiple trials without manually restarting the workflow.
+Slight delays may occur at workflow start due to opening the Arduino connection (Firmata protocol).
+
+✅ Summary:
+Exercise 2 establishes a trial structure where each trial consists of: Waiting a fixed time (ITI) Presenting a stimulus (LED ON). Keeping it on for a defined duration. Turning it off. Automatically starting the next trial
+It’s the foundation for building the full state machine with response detection and reward logic in later exercises.
