@@ -1,0 +1,56 @@
+Exercise 3 — Driving State Transitions with External Behaviour Events
+
+
+Exercise 3 introduces behaviour-driven state transitions. Instead of just turning the stimulus on and off automatically (like in Exercise 2), the system now waits for an external behavioural event (e.g., a button press) to decide when to advance the trial.
+This is the first step in implementing the response window of the task.
+
+🧩 Step-by-Step Workflow Logic
+1. Replace Delay with SelectMany. The Delay node from Exercise 2 is removed. A SelectMany operator is inserted after StimOn.
+Its purpose: Create a new state instance for each trial. Represent the response period where the system is waiting for a behavioural input.
+
+2. Response State
+Inside the SelectMany node: Subscribe to the Response subject. This is the signal coming from the digital sensor (e.g., button press) declared in Exercise 1. Boolean Operator → True
+Converts any detected sensor event into a standard "True" signal, indicating the subject responded.
+
+Take Operator → Count = 1 
+Ensures that only the first event in the response window is considered (i.e., the first button press ends the response state).
+
+Delete Source1
+Source1 is no longer needed inside this node; the workflow is fully driven by the Response subject.
+
+Connect Boolean to WorkflowOutput
+The output of the node now reports the end result of the response period:
+True → button was pressed
+False → no response (handled in later exercises)
+ What this workflow does, in plain words
+
+Stimulus turns on (StimOn).
+
+A new response state is created via SelectMany. The system waits for the first button press from the Response subject.
+When the first press is detected: The Boolean operator outputs True. The Take(1) ensures only the first press is counted.
+WorkflowOutput emits True → state ends.
+
+Effectively, trial progression is now driven by behaviour, rather than by a fixed delay.
+📝 ASCII Flow Diagram
+StimOn (LED ON)
+       │
+       ▼
+  SelectMany (Response State)
+       │
+       ▼
+  ┌─────────────┐
+  │ Response?   │
+  │  True → End │
+  │  False → Wait
+  └─────────────┘
+
+Key Notes
+SelectMany allows each trial to have its own isolated response state.
+The first event triggers the workflow to move forward; all subsequent presses are ignored until the next trial.
+This sets up the logic needed to later implement timeout, success, and failure states.
+
+Summary
+Exercise 3 modifies the task so that state transitions depend on the subject’s behaviour:
+Trials now wait for a button press instead of ending after a fixed delay.
+Only the first response counts for trial progression.
+The output of this node will drive success or miss determination in subsequent exercises.
