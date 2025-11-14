@@ -1,0 +1,55 @@
+Exercise 1 — Declaring and Logging External Hardware Events
+This exercise introduces how to declare external hardware inputs in Bonsai and log their events with timestamps. The goal is to create a simple pipeline that records when a digital sensor is activated, regardless of the behavioural task state.
+
+🔧 Overview
+In operant behaviour tasks, sensors (e.g., beam-breaks, lick detectors, buttons, TTL pulses) are used to capture behaviourally relevant events.
+To ensure proper analysis and debugging, these events must be:
+Detected
+Timestamped
+Saved to disk
+Exercise 1 teaches exactly that.
+
+
+📡 Hardware Setup
+A digital sensor connected to Arduino pin 8 (examples: push button, beam-break, TTL input)
+An Arduino connected via USB to Bonsai
+Simple wiring (ASCII):
+[Sensor Signal] ─────► [Pin 8 Arduino]
+[GND Sensor] ─────────► [Arduino GND]
+
+🧩 Workflow Logic
+The workflow will: Read the sensor line using DigitalInput.
+Publish the signal as a named event stream (Response).
+Add timestamps using Timestamp.
+Save the data into a .csv file using CsvWriter.
+
+ASCII block diagram:
+DigitalInput(Pin 8)
+        │
+        ▼
+PublishSubject("Response")
+        │
+        ▼
+    Timestamp
+        │
+        ▼
+   CsvWriter(.csv)
+
+📝 Step-by-Step Instructions
+1. Insert a DigitalInput Source. Add DigitalInput to the Bonsai canvas. Set Port → Arduino Pin 8. This reads the sensor state (0/1).
+
+2. Publish the Signal as a Named Event Stream
+Right-click the output of the DigitalInput. Select Create Source (bool) → PublishSubject. Name it: Response.
+This makes the stream accessible anywhere else in the workflow.
+
+3. Timestamp the Events. Insert a Timestamp operator. Connect Response → Timestamp. Each state change (0→1 or 1→0) gets a precise time.
+
+4. Log to a CSV File Insert a CsvWriter. Set FileName to something like: response_log.csv
+The file will contain rows such as:
+Timestamp, Value
+2025-11-14T11:12:03.534Z, 1
+2025-11-14T11:12:03.874Z, 0
+
+5. Run the Workflow
+Click Run. Trigger the sensor a few times. Stop the workflow.
+Verify response_log.csv exists and contains timestamped events.
